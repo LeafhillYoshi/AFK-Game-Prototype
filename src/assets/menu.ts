@@ -3,16 +3,16 @@ export class MenuItem extends Phaser.GameObjects.Text {
         super(scene, x, y, text, { fontSize: '32px', color: '#fff' });
     }
 
-    select(){
+    select() {
         this.setStyle({ color: '#f8ff38' });
     }
 
-    deselect(){
+    deselect() {
         this.setStyle({ color: '#fff' });
     }
 }
 export class Menu extends Phaser.GameObjects.Container {
-    
+
     menuItems: any[];
     menuItemIndex: number;
     selected: boolean;
@@ -28,6 +28,25 @@ export class Menu extends Phaser.GameObjects.Container {
 
     addMenuItem(text: string) {
         const menuItem = new MenuItem(0, this.menuItems.length * 40, text, this.scene);
+        menuItem.setInteractive();
+
+        menuItem.on('pointerover', () => {
+            menuItem.setStyle({ color: '#f8ff38' });
+        });
+
+        menuItem.on('pointerout', () => {
+            if (this.menuItems[this.menuItemIndex] !== menuItem) {
+                menuItem.setStyle({ color: '#fff' });
+            }
+        });
+        
+        menuItem.on('pointerdown', () => {
+            this.menuItems[this.menuItemIndex].deselect();
+            this.menuItemIndex = this.menuItems.indexOf(menuItem);
+            this.menuItems[this.menuItemIndex].select();
+            this.confirm();
+        });
+        
         this.menuItems.push(menuItem);
         this.add(menuItem);
         return menuItem;
@@ -56,12 +75,12 @@ export class Menu extends Phaser.GameObjects.Container {
     }
 
     select(index: number | null = null) {
-        if(!index) {
+        if (!index) {
             index = 0;
         }
         this.menuItems[this.menuItemIndex].deselect();
         this.menuItemIndex = index;
-        while (!this.menuItems(this.menuItemIndex).active) {
+        while (!this.menuItems[this.menuItemIndex].active) {
             this.menuItemIndex++;
             if (this.menuItemIndex >= this.menuItems.length) {
                 this.menuItemIndex = 0;
@@ -72,6 +91,10 @@ export class Menu extends Phaser.GameObjects.Container {
         }
         this.menuItems[this.menuItemIndex].select();
         this.selected = true;
-        }
+    }
+
+    confirm() {
+        // Empty method to be inherited.
+        // Player confirms the selected menu item.
     }
 }
